@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<!-- saved from url=(0030)https://tonejs.github.io/Midi/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Tonejs Midi</title>
+		<script type="text/javascript" src="./Tonejs Midi_files/Tone.js.download"></script>
+		<script type="text/javascript" src="./Tonejs Midi_files/tonejs-ui.js.download"></script><style type="text/css">/*@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');*/
+
+body {
+	--label-font-family: sans-serif;
+	--label-font-size: 14px;
+
+	--title-font-family: sans-serif;
+	--title-font-size: 16px;
+
+	--body-font-family: sans-serif;
+	--body-font-size: 14px;
+
+	--color-gray: #a0a0a0;
+	--color-light-gray: #eee;
+	--color-dark-gray: #777;
+	--color-magenta: #F734D7;
+	--color-teal: #22DBC0;
+
+	--outline-color: var(--color-dark-gray);
+
+	--shadow-low: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+	--shadow-medium: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+	--shadow-high: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+
+	--default-margin: 8px 0px 0px 0px;
+	--side-panel-width: 240px;
+	--side-panel-transition: 0.2s;
+
+	font-family: var(--body-font-family);
+	font-size: var(--body-font-size);
+	line-height: 1.4em;
+
+}
+
+body #interface {
+	max-width: 600px;
+	width: 100%;
+	min-width: 300px;
+	margin: 0 auto;
+}
+
+body #interface * {
+	display: inline-block;
+	margin: 5px 0;
+	width: 100%;
+}</style>
+		<script type="text/javascript" src="./Tonejs Midi_files/midi"></script>
+	</head>
+	<body>
+		<style type="text/css">
+			#FileDrop {
+				position: relative;
+				width: 100%;
+				height: 100px;
+				border: 2px dashed black;
+				color: black;
+				margin: 20px auto;
+			}
+
+			#FileDrop.Hover {
+				background-color: black;
+				color: white;
+			}
+
+			#FileDrop input {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				opacity: 0;
+				left: 0px;
+				top: 0px;
+			}
+
+			#FileDrop #Text {
+				position: absolute;
+				width: 100%;
+				height: 20px;
+				line-height: 20px;
+				left: 0px;
+				top: 50%;
+				transform: translate(0, -50%);
+				text-align: center;
+			}
+
+			textarea {
+				font-family: monospace;
+				height: 300px;
+				width: 100%;
+				display: inline-block;
+				position: relative;
+				float: left;
+			}
+
+			#Results {
+				position: relative;
+				width: 100%;
+				margin: 10px auto;
+			}
+
+			#Description {
+				position: relative;
+				width: 100%;
+				text-align: center;
+				height: 40px;
+				font-size: 16px;
+				margin: 10px auto;
+				font-family: sans-serif;
+			}
+
+			tone-play-toggle {
+				margin-top: 10px;
+			}
+		</style>
+		<tone-top-bar><template shadowrootmode="open"><!---->
+			<style>
+
+				:host {
+					display: block;
+					height: 44px;
+					width: 100%;
+				}
+
+				#container {
+					background-color: black;
+					width: 100%;
+					height: 100%;
+				}
+
+				#logo {
+					color: white;
+					font-family: 'Roboto Mono', monospace;
+					font-size: 20px;
+					line-height: 44px;
+					margin-left: 60px;
+					position: relative;
+					display: inline-block;
+				}
+
+				#logo #text {
+					display: inline-block;
+					position: relative;
+				}
+
+				#logo canvas {
+					position: absolute;
+					right: -1px;
+					background-color: #F734D7;
+					height: 26px;
+					width: 26px;
+					top: 10px;
+				}
+
+				tone-unmute {
+					position: fixed;
+					top: 6px;
+					right: 6px;
+					z-index: 1000;
+				}
+
+			</style>
+			<tone-unmute><template shadowrootmode="open"><!---->
+			<style>
+				:host {
+					display: block;
+					position: fixed;
+					top: 10px;
+					right: 10px;
+				}
+
+				#container {
+					position: absolute;
+					width: 44px;
+					height: 44px;
+					right: 0px;
+					top: 0px;
+					border-radius: 24px;
+					border: 2px solid black;
+					background-color: white;
+					overflow: hidden;
+					transition: width 0.2s;
+					box-shadow: var(--shadow-medium);
+				}
+
+				#container:hover:not([novolume]), #container[focused]:not([novolume]) {
+					width: 144px;
+				}
+
+				#container:hover tone-slider, #container[focused] tone-slider {
+					opacity: 1;
+					width: 80px;
+				}
+
+				tone-slider {
+					position: absolute;
+					left: 16px;
+					top: 2px;
+					width: 0px;
+					opacity: 0;
+					transition: width 0.2s, opacity 0.2s;;
+				}
+
+				#speaker {
+					position: absolute;
+					top: 10px;
+					right: 10px;
+					background-color: transparent;
+					outline-color: var(--outline-color);
+					border: none;
+					-webkit-appearance: none;
+					height: 24px;
+					width: 24px;
+					padding: 0px;
+					cursor: pointer;
+				}
+
+				#speaker svg {
+					width: 100%;
+					height: 100%;
+				}
+
+			</style>
+			<div id="container">
+				<button id="speaker" aria-label="speaker" aria-checked="true">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>
+				</button>
+
+				
+					<tone-slider id="volume" bare="" min="-60" max="0" value="0"><template shadowrootmode="open"><!---->
+			<style>
+				:host{display:inline-block}#container{margin-top:5px;display:inline-block;width:100%}#container label,#container #units{font-size:var(--label-font-size);font-family:var(--label-font-family);float:left}#container #units[hidden]{display:none}#container input[type="number"]{padding:0;float:right;-webkit-appearance:none;border:none;text-align:right;font-size:var(--label-font-size);font-family:var(--label-font-family);outline-color:var(--outline-color);outline-offset:1px;width:70px;background-color:transparent}#container input[type="number"]:invalid{box-shadow:none}#container #units{float:right}#container #slider{margin-top:5px;width:100%;display:inline-block;position:relative;height:20px}#container #slider input[type="range"]{opacity:0;padding:0;margin:0;width:100%;height:20px}#container #slider #line,#container #slider #circle,#container #slider #anchor{pointer-events:none;position:absolute;left:0px;top:0px}#container #slider #line{position:absolute;top:50%;transform:translate(0, -50%);height:4px;border-radius:2px;width:100%;background-color:#aaa}#container #slider #line #anchor{position:absolute;width:0%;top:0px;height:100%;background-color:black;border-radius:2px}#container #slider #line #anchor.left{left:0px}#container #slider #line #anchor.center{left:50%}#container #slider #circle{--computed-thumb-height: var(--thumb-height, 24px);--computed-thumb-width: var(--thumb-width, 24px);border-radius:2px;width:var(--computed-thumb-width);height:var(--computed-thumb-height);top:calc((20px - var(--computed-thumb-height)) / 2);background-color:black;box-shadow:var(--shadow-low)}#container #slider #circle.focus{outline:5px auto var(--focus-ring-color, black)}
+
+			</style>
+			<div id="container">
+				<label for="value" hidden=""><!----><!----></label>
+				<span id="units" hidden=""><!----><!----></span>
+				<input name="value" type="number" hidden="" min="-60" max="0" step="1">
+				<div id="slider">
+					<input name="value" type="range" min="1" max="101" step="1">
+					<div id="line">
+						<div id="anchor" class="left" style="width:99%; left:0%"></div>
+					</div>
+					<div id="circle" style="left: calc(99% - 11.88px);"></div>
+				</div>
+			</div>
+		<!----></template></tone-slider>
+				
+			</div>
+		<!----></template></tone-unmute>
+			<div id="container">
+				<a id="logo" href="https://tonejs.github.io/">
+					<canvas width="52"></canvas>
+					<div id="text">Tone.js</div>
+				</a>
+			</div>
+		<!----></template></tone-top-bar>
+		<tone-content><template shadowrootmode="open"><!---->
+			<style>
+
+				:host {
+					display: block;
+					width: 100%;
+				}
+				#content {
+					width: 80%;
+					min-width: 320px;
+					max-width: 600px;
+					margin: 40px auto 60px;
+				}
+
+			</style>
+			<div id="content">
+				<slot></slot>
+			</div>
+		<!----></template>
+			<div id="Description">
+				Parse a MIDI file into a Tone.js-friendly JSON format.
+			</div>
+			<div id="FileDrop">
+				<div id="Text">
+					Drop a midi file here
+				</div>
+				<input type="file" accept="audio/midi">
+			</div>
+			<div id="Results">
+				<textarea id="ResultsText" placeholder="json output..."></textarea>
+			</div>
+			<tone-play-toggle disabled=""><template shadowrootmode="open"><!---->
+			<style>
+				:host {
+					display: inline-block;
+					min-width: 80px;
+					width: 100%;
+				}
+
+				#container {
+					display: inline-block;
+					width: 100%;
+				}
+
+				label {
+					font-family: var(--label-font-family);
+					font-size: var(--label-font-size);
+					margin-right: 20px;
+				}
+
+				button {
+					box-sizing: border-box;
+					width: 100%;
+					height: 44px;
+					outline-color: var(--outline-color);
+					border: 2px solid black;
+					border-radius: 22px;
+					padding: 0px;
+					font-size: 30px;
+					text-align: center;
+					cursor: pointer;
+					transition: box-shadow 0.1s;
+					box-shadow: var(--shadow-low);
+				}
+
+				button:hover, button:focus {
+					box-shadow: var(--shadow-medium);
+				}
+
+				button[disabled]{
+					opacity: 0.5;
+				}
+
+				button svg {
+					margin-top: 4px;
+					width: 30px;
+					height: 30px;
+				}
+
+			</style>
+			<div id="container">
+				<button aria-label="Play" disabled="">
+					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg>
+				</button>
+			</div>
+		<!----></template></tone-play-toggle>
+		</tone-content>
+
+		<script type="text/javascript">
+			if (
+				!(
+					window.File &&
+					window.FileReader &&
+					window.FileList &&
+					window.Blob
+				)
+			) {
+				document.querySelector("#FileDrop #Text").textContent =
+					"Reading files not supported by this browser";
+			} else {
+				const fileDrop = document.querySelector("#FileDrop");
+
+				fileDrop.addEventListener("dragenter", () =>
+					fileDrop.classList.add("Hover")
+				);
+
+				fileDrop.addEventListener("dragleave", () =>
+					fileDrop.classList.remove("Hover")
+				);
+
+				fileDrop.addEventListener("drop", () =>
+					fileDrop.classList.remove("Hover")
+				);
+
+				document
+					.querySelector("#FileDrop input")
+					.addEventListener("change", (e) => {
+						//get the files
+						const files = e.target.files;
+						if (files.length > 0) {
+							const file = files[0];
+							document.querySelector(
+								"#FileDrop #Text"
+							).textContent = file.name;
+							parseFile(file);
+						}
+					});
+			}
+
+			let currentMidi = null;
+
+			function parseFile(file) {
+				//read the file
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					const midi = new Midi(e.target.result);
+					document.querySelector(
+						"#ResultsText"
+					).value = JSON.stringify(midi, undefined, 2);
+					document
+						.querySelector("tone-play-toggle")
+						.removeAttribute("disabled");
+					currentMidi = midi;
+				};
+				reader.readAsArrayBuffer(file);
+			}
+
+			const synths = [];
+			document
+				.querySelector("tone-play-toggle")
+				.addEventListener("play", (e) => {
+					const playing = e.detail;
+					if (playing && currentMidi) {
+						const now = Tone.now() + 0.5;
+						currentMidi.tracks.forEach((track) => {
+							//create a synth for each track
+							const synth = new Tone.PolySynth(Tone.Synth, {
+								envelope: {
+									attack: 0.02,
+									decay: 0.1,
+									sustain: 0.3,
+									release: 1,
+								},
+							}).toDestination();
+							synths.push(synth);
+							//schedule all of the events
+							track.notes.forEach((note) => {
+								synth.triggerAttackRelease(
+									note.name,
+									note.duration,
+									note.time + now,
+									note.velocity
+								);
+							});
+						});
+					} else {
+						//dispose the synth and make a new one
+						while (synths.length) {
+							const synth = synths.shift();
+							synth.disconnect();
+						}
+					}
+				});
+		</script>
+	
+
+</body></html>
